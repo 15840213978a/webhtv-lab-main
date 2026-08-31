@@ -176,6 +176,20 @@ body { background:var(--bg); color:var(--fg); }
 
 /* ===== 正文排版 ===== */
 #reader { padding:64px 22px 96px; max-width:720px; margin:0 auto; }
+/* ===== 漫画模式 - 影视+独立风格 ===== */
+#reader.comic-mode { padding:0; max-width:100%; margin:0; background:#111; min-height:100vh; }
+#reader.comic-mode .comic-progress { position:sticky; top:0; z-index:100; background:rgba(0,0,0,0.85); backdrop-filter:blur(12px); padding:10px 16px; display:flex; align-items:center; gap:10px; }
+#reader.comic-mode .comic-progress-bar { height:3px; flex:1; background:rgba(255,255,255,0.2); border-radius:2px; overflow:hidden; }
+#reader.comic-mode .comic-progress-bar::after { content:''; display:block; height:100%; width:var(--progress,0%); background:#ff6b35; border-radius:2px; transition:width 0.3s; }
+#reader.comic-mode .comic-progress-text { font-size:13px; color:#fff; opacity:0.8; white-space:nowrap; }
+#reader.comic-mode .comic-grid { display:flex; flex-direction:column; align-items:center; gap:0; }
+#reader.comic-mode .comic-img-wrap { position:relative; width:100%; line-height:0; }
+#reader.comic-mode .comic-img-wrap .comic-img { width:100%; display:block; margin:0; }
+#reader.comic-mode .comic-img-label { position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.65); color:#fff; font-size:12px; padding:3px 10px; border-radius:12px; pointer-events:none; backdrop-filter:blur(4px); }
+#reader.comic-mode .comic-loading-hint { text-align:center; padding:30px; color:rgba(255,255,255,0.5); font-size:14px; }
+#reader.comic-mode .comic-chapter-nav { padding:24px; text-align:center; }
+#reader.comic-mode .comic-chapter-nav button { background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 28px; border-radius:20px; font-size:14px; cursor:pointer; margin:0 8px; }
+#reader.comic-mode .comic-chapter-nav button:active { background:rgba(255,255,255,0.3); }
 .novel-chapter-title { text-align:center; font-size:1.35em; font-weight:800; margin:8px 0 26px; color:var(--fg); }
 .novel-content p { text-indent:2em; margin:0 0 0.8em; font-size:18px; line-height:2.0; color:var(--fg); font-family:var(--reader-font); letter-spacing:0.02em; }
 .novel-html { font-size:17px; line-height:1.85; color:var(--fg); }
@@ -1527,6 +1541,7 @@ function renderContent(){
     restoringPage = false;
     var r = $('reader');
     r.innerHTML = '';
+    r.className = '';
     navAppended = false;
     if(DATA.kind === 1){
         if(isPageMode()){
@@ -1640,6 +1655,7 @@ function renderComic(){
     comicIdx = 0; comicLoading = false;
     var r = reader;
     r.innerHTML = '';
+    r.className = 'comic-mode';
     // 影视+ 风格：顶部进度条
     var prog = document.createElement('div');
     prog.className = 'comic-progress';
@@ -1657,6 +1673,9 @@ function loadMoreComic(){
     comicLoading = true;
     var end = Math.min(comicIdx + BATCH, DATA.images.length);
     var grid = comicGrid;
+    // 移除旧的加载提示
+    var oldHint = grid.querySelector('.comic-loading-hint');
+    if(oldHint) oldHint.remove();
     for(var i = comicIdx; i < end; i++){
         var wrap = document.createElement('div');
         wrap.className = 'comic-img-wrap';
@@ -1665,7 +1684,7 @@ function loadMoreComic(){
         img.src = DATA.images[i];
         img.loading = 'lazy';
         wrap.appendChild(img);
-        // 影视+ 风格：图片序号标签
+        // 页码标签
         var label = document.createElement('div');
         label.className = 'comic-img-label';
         label.textContent = (i + 1) + ' / ' + DATA.images.length;
@@ -1675,7 +1694,16 @@ function loadMoreComic(){
     comicIdx = end;
     comicLoading = false;
     updateComicProgress();
-    if(comicIdx >= DATA.images.length) appendChapterNav();
+    // 还有更多图片时显示加载提示
+    if(comicIdx < DATA.images.length){
+        var hint = document.createElement('div');
+        hint.className = 'comic-loading-hint';
+        hint.textContent = '↓ 继续滚动加载更多';
+        grid.appendChild(hint);
+    } else {
+        // 全部加载完毕，显示章节导航
+        appendComicChapterNav();
+    }
 }
 function updateComicProgress(){
     var total = DATA.images.length;
@@ -1685,6 +1713,21 @@ function updateComicProgress(){
     var txt = comicProgressText;
     if(bar) bar.style.setProperty('--progress', pct + '%');
     if(txt) txt.textContent = loaded + ' / ' + total + ' (' + pct + '%)';
+}
+function appendComicChapterNav(){
+    if(!comicGrid) return;
+    if(!DATA.chapters || DATA.chapters.length <= 1) return;
+    var nav = document.createElement('div');
+    nav.className = 'comic-chapter-nav';
+    var prevBtn = document.createElement('button');
+    prevBtn.textContent = '◀ 上一章';
+    prevBtn.onclick = function(){ if(DATA.current > 0) goChapter(DATA.current - 1); };
+    var nextBtn = document.createElement('button');
+    nextBtn.textContent = '下一章 ▶';
+    nextBtn.onclick = function(){ if(DATA.current < DATA.chapters.length - 1) goChapter(DATA.current + 1); };
+    if(DATA.current > 0) nav.appendChild(prevBtn);
+    if(DATA.current < DATA.chapters.length - 1) nav.appendChild(nextBtn);
+    comicGrid.appendChild(nav);
 }
 /* ===== PDF ===== */
 var pdfDoc = null, pdfPageIdx = 0, renderedPdfPages = {}, pdfRendering = false, pdfAppendedCount = 0;
@@ -1911,11 +1954,32 @@ window.addEventListener('scroll', function(){
         reportProgress();
     }, 120);
 });
+// 漫画/PDF滚动加载（不需要方向检测）
 window.addEventListener('scroll', function(){
     if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 800){
         if(DATA.kind === 3) renderPdfMore();
-        else if(DATA.kind === 1) loadNextNovelChapter();
-        else loadMoreComic();
+        else if(DATA.kind === 2) loadMoreComic();
+    }
+});
+// 小说翻页：仅在滚到底部附近且正在向下滚动时触发
+var _lastScrollY = 0;
+var _novelScrollTimer = null;
+window.addEventListener('scroll', function(){
+    if(DATA.kind !== 1) return;
+    var curY = window.scrollY;
+    var scrollingDown = curY > _lastScrollY;
+    _lastScrollY = curY;
+    // 必须向下滚动 + 距离底部200px以内
+    if(scrollingDown && (window.innerHeight + curY >= document.body.scrollHeight - 200)){
+        if(!_novelScrollTimer){
+            _novelScrollTimer = setTimeout(function(){
+                loadNextNovelChapter();
+                _novelScrollTimer = null;
+            }, 800);  // 停留0.8秒确认用户确实想翻章
+        }
+    } else {
+        // 用户往上滚或离开底部，取消翻章
+        if(_novelScrollTimer){ clearTimeout(_novelScrollTimer); _novelScrollTimer = null; }
     }
 });
 
