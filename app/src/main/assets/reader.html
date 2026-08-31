@@ -190,6 +190,70 @@ body { background:var(--bg); color:var(--fg); }
 #reader.comic-mode .comic-chapter-nav { padding:24px; text-align:center; }
 #reader.comic-mode .comic-chapter-nav button { background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:10px 28px; border-radius:20px; font-size:14px; cursor:pointer; margin:0 8px; }
 #reader.comic-mode .comic-chapter-nav button:active { background:rgba(255,255,255,0.3); }
+/* ===== 漫画：影视+ 独立阅读器 UI ===== */
+body.comic-active #topBar, body.comic-active #bottomBar, body.comic-active #readingStatusBar { display:none !important; }
+body.comic-active { background:#111; }
+body.comic-active .chapter-drawer { background:rgba(20,20,30,0.96); }
+body.comic-active .chapter-drawer .drawer-tab, body.comic-active .chapter-drawer .drawer-tab.active,
+body.comic-active .chapter-drawer .chapter-item, body.comic-active .chapter-drawer .chapter-search,
+body.comic-active .chapter-drawer .drawer-tab-content { color:#e8ecf1; border-color:rgba(255,255,255,0.15); }
+/* 漫画舞台 */
+#reader.comic-mode .comic-stage { position:relative; width:100%; min-height:100vh; background:#111; }
+#reader.comic-mode .comic-page-wrap { position:fixed; top:0; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; background:#111; }
+#reader.comic-mode .comic-page { max-width:100%; max-height:100%; object-fit:contain; }
+#reader.comic-mode .comic-tap-left, #reader.comic-mode .comic-tap-right {
+    position:fixed; top:0; bottom:0; width:20%; display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0); font-size:52px; cursor:pointer; z-index:5; user-select:none; -webkit-user-select:none;
+}
+#reader.comic-mode .comic-tap-left { left:0; }
+#reader.comic-mode .comic-tap-right { right:0; }
+/* 上下滚动模式 */
+#reader.comic-mode .comic-scroll { display:flex; flex-direction:column; align-items:center; padding-bottom:140px; }
+#reader.comic-mode .comic-scroll .comic-img-wrap { position:relative; width:100%; line-height:0; }
+#reader.comic-mode .comic-scroll .comic-img { width:100%; display:block; }
+#reader.comic-mode .comic-scroll .comic-img-label { position:absolute; bottom:10px; right:10px; top:auto; background:rgba(0,0,0,0.6); color:#fff; font-size:12px; padding:2px 8px; border-radius:10px; pointer-events:none; }
+/* 漫画底部毛玻璃控制栏（影视+风格） */
+#comicBottomBar {
+    position:fixed; left:10px; right:10px; bottom:8px; z-index:900;
+    background:rgba(20,20,30,0.88); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border-radius:16px; border:1px solid rgba(255,255,255,0.08); box-shadow:0 4px 24px rgba(0,0,0,0.5);
+    transform:translateY(130%); transition:transform 0.28s cubic-bezier(0.2,0.8,0.2,1); padding:10px 14px 8px; color:#fff;
+}
+#comicBottomBar.show { transform:translateY(0); }
+.comic-seek { width:100%; height:24px; -webkit-appearance:none; appearance:none; background:transparent; margin:0; }
+.comic-seek::-webkit-slider-runnable-track { height:3px; border-radius:2px; background:rgba(255,255,255,0.2); }
+.comic-seek::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#ff6b35; margin-top:-5px; box-shadow:0 0 6px rgba(255,107,53,0.6); }
+.comic-bar-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
+.comic-bar-row .comic-nav-btn {
+    background:rgba(255,255,255,0.12); color:#fff; border:none; border-radius:14px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap;
+}
+.comic-bar-row .comic-nav-btn:active { background:rgba(255,255,255,0.25); }
+.comic-page-info { flex:1; text-align:center; font-size:13px; color:rgba(255,255,255,0.75); }
+.comic-func-row { display:flex; margin-top:6px; }
+.comic-func-btn {
+    flex:1; background:transparent; border:none; color:rgba(255,255,255,0.85); font-size:11px; padding:6px 0; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:8px;
+}
+.comic-func-btn:active { background:rgba(255,255,255,0.12); }
+.comic-func-btn .comic-func-ico { font-size:18px; line-height:1; }
+/* 漫画设置面板（影视+风格） */
+#comicSettingPanel {
+    position:fixed; left:10px; right:10px; bottom:8px; z-index:950;
+    background:rgba(25,25,38,0.96); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border-radius:16px; border:1px solid rgba(255,255,255,0.08); color:#fff; padding:14px 18px 20px;
+    transform:translateY(130%); transition:transform 0.28s cubic-bezier(0.2,0.8,0.2,1);
+}
+#comicSettingPanel.show { transform:translateY(0); }
+#comicSettingPanel .comic-panel-handle { width:36px; height:4px; border-radius:2px; background:rgba(255,255,255,0.3); margin:0 auto 12px; }
+#comicSettingPanel .comic-panel-title { text-align:center; font-size:15px; font-weight:700; margin-bottom:6px; }
+#comicSettingPanel .comic-set-label { font-size:12px; color:rgba(255,255,255,0.6); margin:12px 0 8px; }
+#comicSettingPanel .comic-capsule-row { display:flex; gap:8px; }
+#comicSettingPanel .comic-capsule {
+    flex:1; text-align:center; padding:10px 0; border-radius:20px; font-size:13px; color:#fff;
+    background:rgba(255,255,255,0.1); cursor:pointer;
+}
+#comicSettingPanel .comic-capsule.active { background:#ff6b35; }
+#comicSettingPanel .comic-close { position:absolute; top:10px; right:14px; font-size:18px; color:rgba(255,255,255,0.7); cursor:pointer; background:none; border:none; }
 .novel-chapter-title { text-align:center; font-size:1.35em; font-weight:800; margin:8px 0 26px; color:var(--fg); }
 .novel-content p { text-indent:2em; margin:0 0 0.8em; font-size:18px; line-height:2.0; color:var(--fg); font-family:var(--reader-font); letter-spacing:0.02em; }
 .novel-html { font-size:17px; line-height:1.85; color:var(--fg); }
@@ -471,6 +535,39 @@ body { background:var(--bg); color:var(--fg); }
     </div>
 </div>
 
+<!-- ===== 漫画底部控制栏（影视+风格） ===== -->
+<div id="comicBottomBar">
+    <input type="range" class="comic-seek" id="comicSeek" min="0" max="100" value="0" />
+    <div class="comic-bar-row">
+        <button class="comic-nav-btn" id="comicBtnPrevChapter">上一章</button>
+        <div class="comic-page-info" id="comicPageInfo">0/0</div>
+        <button class="comic-nav-btn" id="comicBtnNextChapter">下一章</button>
+    </div>
+    <div class="comic-func-row">
+        <button class="comic-func-btn" id="comicModeBtn"><span class="comic-func-ico">⇄</span><span id="comicModeLabel">上下滚动</span></button>
+        <button class="comic-func-btn" id="comicAutoBtn"><span class="comic-func-ico">▶</span><span>自动滚动</span></button>
+        <button class="comic-func-btn" id="comicSettingBtn"><span class="comic-func-ico">⚙</span><span>设置</span></button>
+        <button class="comic-func-btn" id="comicChapterBtn"><span class="comic-func-ico">☰</span><span>目录</span></button>
+    </div>
+</div>
+
+<!-- ===== 漫画设置面板（影视+风格） ===== -->
+<div id="comicSettingPanel">
+    <button class="comic-close" data-close="comicSettingPanel">✕</button>
+    <div class="comic-panel-handle"></div>
+    <div class="comic-panel-title">浏览设置</div>
+    <div class="comic-set-label">翻页方向</div>
+    <div class="comic-capsule-row">
+        <div class="comic-capsule comic-dir-opt" data-dir="h">← 左右 →</div>
+        <div class="comic-capsule comic-dir-opt" data-dir="v">↑ 上下 ↓</div>
+    </div>
+    <div class="comic-set-label">分界图高度</div>
+    <div class="comic-capsule-row">
+        <div class="comic-capsule comic-trans-opt" data-h="full">全屏</div>
+        <div class="comic-capsule comic-trans-opt" data-h="half">半屏</div>
+    </div>
+</div>
+
 <!-- ===== 章节目录抽屉 ===== -->
 <div class="chapter-drawer" id="chapterDrawer">
     <div class="drawer-handle"></div>
@@ -541,15 +638,30 @@ function hideUI(){
     closeAllPanels();
 }
 function toggleUI(){ if(uiVisible) hideUI(); else showUI(); }
+function toggleUIForKind(){
+    if(document.body.classList.contains('comic-active')){
+        var bar = $('comicBottomBar');
+        if(bar.classList.contains('show')){ bar.classList.remove('show'); $('comicSettingPanel').classList.remove('show'); closeAllPanels(); }
+        else { bar.classList.add('show'); }
+    } else {
+        toggleUI();
+    }
+}
 
 function closeAllPanels(){
-    ['settingPanel','ttsPanel','autoScrollPanel'].forEach(function(id){
+    ['settingPanel','ttsPanel','autoScrollPanel','comicSettingPanel'].forEach(function(id){
         $(id).classList.remove('show');
     });
     $('chapterDrawer').classList.remove('show');
     $('panelMask').classList.remove('show');
 }
 qsa('.panel-close').forEach(function(b){
+    b.addEventListener('click', function(){
+        $(this.dataset.close).classList.remove('show');
+        $('panelMask').classList.remove('show');
+    });
+});
+qsa('.comic-close').forEach(function(b){
     b.addEventListener('click', function(){
         $(this.dataset.close).classList.remove('show');
         $('panelMask').classList.remove('show');
@@ -785,6 +897,7 @@ $('reader').addEventListener('click', function(e){
     if(swipeConsumed){ swipeConsumed = false; return; }
     if(e.target.closest('.pill-opt') || e.target.closest('button') || e.target.closest('a')) return;
     var x = e.clientX, w = window.innerWidth;
+    if(document.body.classList.contains('comic-active')){ toggleUIForKind(); return; }
     if(x > w * 0.32 && x < w * 0.68){ toggleUI(); return; }
     if(uiVisible){ hideUI(); return; }
     if(x < w * 0.32){ pagePrev(); } else { pageNext(); }
@@ -1542,6 +1655,7 @@ function renderContent(){
     var r = $('reader');
     r.innerHTML = '';
     r.className = '';
+    setComicActive(DATA.kind === 2);
     navAppended = false;
     if(DATA.kind === 1){
         if(isPageMode()){
@@ -1570,7 +1684,7 @@ function renderContent(){
     } else if(DATA.kind === 3){
         pageMode = false;
         renderPdf();
-    } else {
+    } else if(DATA.kind === 2){
         pageMode = false;
         renderComic();
     }
@@ -1649,32 +1763,129 @@ function loadNextNovelChapter(){
     goChapter(DATA.current + 1);
     setTimeout(function(){ novelChapterLoading = false; }, 2000);
 }
-/* ===== 漫画 ===== */
+/* ===== 漫画：影视+ 独立阅读器 ===== */
 var comicIdx = 0, comicLoading = false;
+var comicMode = getSet('reader_comicMode', 'v'); // 'h' 左右翻页 / 'v' 上下滚动
+var comicTransH = getSet('reader_comicTransH', 'full'); // 分界图高度 full/half
+var comicCur = 0, comicTotal = 0;
+var comicImages = [];
+var comicAutoTimer = null;
+var comicTouchX = 0, comicTouchY = 0, comicSwiping = false;
+
+function setComicActive(on){
+    document.body.classList.toggle('comic-active', on);
+    if(on){
+        $('topBar').classList.remove('show');
+        $('bottomBar').classList.remove('show');
+        $('readingStatusBar').classList.remove('show');
+        $('comicBottomBar').classList.add('show');
+        closeAllPanels();
+    } else {
+        stopComicAuto();
+        $('comicBottomBar').classList.remove('show');
+        $('comicSettingPanel').classList.remove('show');
+    }
+}
+
 function renderComic(){
     comicIdx = 0; comicLoading = false;
-    var r = reader;
+    comicCur = 0; comicTotal = 0; comicImages = [];
+    setComicActive(true);
+    var r = $('reader');
     r.innerHTML = '';
     r.className = 'comic-mode';
-    // 影视+ 风格：顶部进度条
-    var prog = document.createElement('div');
-    prog.className = 'comic-progress';
-    prog.innerHTML = '<div class="comic-progress-bar" id="comicProgressBar"></div><div class="comic-progress-text" id="comicProgressText">0 / 0</div>';
-    r.appendChild(prog);
-    // 网格容器
-    var grid = document.createElement('div');
-    grid.className = 'comic-grid';
-    grid.id = 'comicGrid';
-    r.appendChild(grid);
-    loadMoreComic();
+    comicTotal = DATA.images.length;
+    if(!comicTotal){ r.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;padding:80px 20px;">未找到漫画图片</div>'; return; }
+
+    var stage = document.createElement('div');
+    stage.className = 'comic-stage';
+    stage.id = 'comicStage';
+    r.appendChild(stage);
+
+    if(comicMode === 'h'){
+        // 左右翻页：单页居中显示，滑动/点按翻页
+        var wrap = document.createElement('div');
+        wrap.className = 'comic-page-wrap';
+        wrap.id = 'comicPageWrap';
+        var img = document.createElement('img');
+        img.className = 'comic-page';
+        img.id = 'comicPageImg';
+        img.alt = '';
+        wrap.appendChild(img);
+        stage.appendChild(wrap);
+        // 预加载全部
+        for(var i = 0; i < comicTotal; i++){
+            (function(src){ var im = new Image(); im.src = src; comicImages.push(im); })(DATA.images[i]);
+        }
+        bindComicSwipe(wrap);
+        var left = document.createElement('div'); left.className = 'comic-tap-left'; left.textContent = '‹';
+        left.onclick = function(){ comicFlip(-1); };
+        var right = document.createElement('div'); right.className = 'comic-tap-right'; right.textContent = '›';
+        right.onclick = function(){ comicFlip(1); };
+        stage.appendChild(left); stage.appendChild(right);
+        comicShowPage(0);
+    } else {
+        // 上下滚动：懒加载
+        var sc = document.createElement('div');
+        sc.className = 'comic-scroll';
+        sc.id = 'comicScroll';
+        stage.appendChild(sc);
+        loadMoreComic();
+    }
+    refreshComicMode();
+    updateComicInfo();
 }
+
+function comicFlip(dir){
+    var i = comicCur + dir;
+    if(i < 0 || i >= comicTotal){ showToast(i < 0 ? '已是第一页' : '已是最后一页'); return; }
+    comicShowPage(i);
+}
+
+function comicShowPage(i){
+    comicCur = i;
+    var img = $('comicPageImg');
+    if(img){
+        img.src = DATA.images[i];
+        if(i + 1 < comicTotal && comicImages[i+1]) comicImages[i+1].src = DATA.images[i+1];
+        if(i - 1 >= 0 && comicImages[i-1]) comicImages[i-1].src = DATA.images[i-1];
+    }
+    updateComicInfo();
+}
+
+function bindComicSwipe(el){
+    el.addEventListener('touchstart', function(e){
+        comicTouchX = e.touches[0].clientX;
+        comicTouchY = e.touches[0].clientY;
+        comicSwiping = true;
+    }, {passive:true});
+    el.addEventListener('touchend', function(e){
+        if(!comicSwiping) return;
+        comicSwiping = false;
+        var dx = e.changedTouches[0].clientX - comicTouchX;
+        var dy = e.changedTouches[0].clientY - comicTouchY;
+        if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+            comicFlip(dx < 0 ? 1 : -1);
+        }
+    }, {passive:true});
+}
+
+function updateComicInfo(){
+    var total = comicTotal;
+    var cur = comicMode === 'h' ? comicCur + 1 : Math.min(comicIdx || 1, total);
+    var pct = total > 0 ? Math.round(cur / total * 100) : 0;
+    var seek = $('comicSeek'); if(seek) seek.value = pct;
+    var info = $('comicPageInfo'); if(info) info.textContent = cur + '/' + total;
+}
+
 function loadMoreComic(){
     if(comicLoading || comicIdx >= DATA.images.length) return;
+    if(comicMode === 'h'){ comicIdx = DATA.images.length; updateComicInfo(); return; }
     comicLoading = true;
     var end = Math.min(comicIdx + BATCH, DATA.images.length);
-    var grid = comicGrid;
-    // 移除旧的加载提示
-    var oldHint = grid.querySelector('.comic-loading-hint');
+    var sc = $('comicScroll');
+    if(!sc){ comicLoading = false; return; }
+    var oldHint = sc.querySelector('.comic-loading-hint');
     if(oldHint) oldHint.remove();
     for(var i = comicIdx; i < end; i++){
         var wrap = document.createElement('div');
@@ -1684,38 +1895,28 @@ function loadMoreComic(){
         img.src = DATA.images[i];
         img.loading = 'lazy';
         wrap.appendChild(img);
-        // 页码标签
         var label = document.createElement('div');
         label.className = 'comic-img-label';
         label.textContent = (i + 1) + ' / ' + DATA.images.length;
         wrap.appendChild(label);
-        grid.appendChild(wrap);
+        sc.appendChild(wrap);
     }
     comicIdx = end;
     comicLoading = false;
-    updateComicProgress();
-    // 还有更多图片时显示加载提示
+    updateComicInfo();
     if(comicIdx < DATA.images.length){
         var hint = document.createElement('div');
         hint.className = 'comic-loading-hint';
         hint.textContent = '↓ 继续滚动加载更多';
-        grid.appendChild(hint);
+        sc.appendChild(hint);
     } else {
-        // 全部加载完毕，显示章节导航
         appendComicChapterNav();
     }
 }
-function updateComicProgress(){
-    var total = DATA.images.length;
-    var loaded = comicIdx;
-    var pct = total > 0 ? Math.round(loaded / total * 100) : 0;
-    var bar = comicProgressBar;
-    var txt = comicProgressText;
-    if(bar) bar.style.setProperty('--progress', pct + '%');
-    if(txt) txt.textContent = loaded + ' / ' + total + ' (' + pct + '%)';
-}
+
 function appendComicChapterNav(){
-    if(!comicGrid) return;
+    var sc = $('comicScroll');
+    if(!sc) return;
     if(!DATA.chapters || DATA.chapters.length <= 1) return;
     var nav = document.createElement('div');
     nav.className = 'comic-chapter-nav';
@@ -1727,8 +1928,78 @@ function appendComicChapterNav(){
     nextBtn.onclick = function(){ if(DATA.current < DATA.chapters.length - 1) goChapter(DATA.current + 1); };
     if(DATA.current > 0) nav.appendChild(prevBtn);
     if(DATA.current < DATA.chapters.length - 1) nav.appendChild(nextBtn);
-    comicGrid.appendChild(nav);
+    sc.appendChild(nav);
 }
+
+/* ---------- 漫画底部控制栏 ---------- */
+function comicPrevChapter(){ if(DATA.current > 0) goChapter(DATA.current - 1); else showToast('已是第一章'); }
+function comicNextChapter(){ if(DATA.current < DATA.chapters.length - 1) goChapter(DATA.current + 1); else showToast('已是最后一章'); }
+function toggleComicMode(){
+    comicMode = comicMode === 'h' ? 'v' : 'h';
+    putSet('reader_comicMode', comicMode);
+    renderComic();
+    showToast(comicMode === 'h' ? '已切换为左右翻页' : '已切换为上下滚动');
+}
+function refreshComicMode(){
+    var lb = $('comicModeLabel'); if(lb) lb.textContent = comicMode === 'h' ? '左右翻页' : '上下滚动';
+    qsa('.comic-dir-opt').forEach(function(x){ x.classList.toggle('active', x.dataset.dir === comicMode); });
+    qsa('.comic-trans-opt').forEach(function(x){ x.classList.toggle('active', x.dataset.h === comicTransH); });
+}
+function toggleComicAuto(){
+    if(comicAutoTimer){ stopComicAuto(); showToast('已停止自动滚动'); return; }
+    var b = $('comicAutoBtn');
+    if(comicMode === 'h'){
+        comicAutoTimer = setInterval(function(){
+            if(comicCur >= comicTotal - 1){ stopComicAuto(); showToast('已到最后一页'); return; }
+            comicFlip(1);
+        }, 2500);
+        if(b) b.querySelector('span:last-child').textContent = '停止';
+    } else {
+        comicAutoTimer = setInterval(function(){
+            window.scrollBy(0, window.innerHeight * 0.55);
+            if(window.innerHeight + window.scrollY >= document.body.scrollHeight - 400){ stopComicAuto(); }
+        }, 1500);
+        if(b) b.querySelector('span:last-child').textContent = '停止';
+    }
+    showToast('自动滚动已开启');
+}
+function stopComicAuto(){
+    if(comicAutoTimer){ clearInterval(comicAutoTimer); comicAutoTimer = null; }
+    var b = $('comicAutoBtn'); if(b){ var s = b.querySelector('span:last-child'); if(s) s.textContent = '自动滚动'; }
+}
+
+/* ---------- 漫画设置面板 ---------- */
+qsa('.comic-dir-opt').forEach(function(x){
+    x.addEventListener('click', function(){
+        comicMode = x.dataset.dir;
+        putSet('reader_comicMode', comicMode);
+        renderComic();
+        showToast(comicMode === 'h' ? '已切换为左右翻页' : '已切换为上下滚动');
+    });
+});
+qsa('.comic-trans-opt').forEach(function(x){
+    x.addEventListener('click', function(){
+        comicTransH = x.dataset.h;
+        putSet('reader_comicTransH', comicTransH);
+        refreshComicMode();
+        showToast(comicTransH === 'full' ? '分界图高度：全屏' : '分界图高度：半屏');
+    });
+});
+$('comicModeBtn').addEventListener('click', toggleComicMode);
+$('comicAutoBtn').addEventListener('click', toggleComicAuto);
+$('comicSettingBtn').addEventListener('click', function(){ closeAllPanels(); $('comicSettingPanel').classList.add('show'); $('panelMask').classList.add('show'); });
+$('comicChapterBtn').addEventListener('click', function(){ openDrawer('chapter'); });
+$('comicBtnPrevChapter').addEventListener('click', comicPrevChapter);
+$('comicBtnNextChapter').addEventListener('click', comicNextChapter);
+$('comicSeek').addEventListener('input', function(){
+    var pct = parseInt(this.value, 10) || 0;
+    var target = Math.round(pct / 100 * (comicTotal - 1));
+    if(comicMode === 'h'){
+        comicShowPage(target);
+    } else {
+        window.scrollTo(0, document.body.scrollHeight * pct / 100);
+    }
+});
 /* ===== PDF ===== */
 var pdfDoc = null, pdfPageIdx = 0, renderedPdfPages = {}, pdfRendering = false, pdfAppendedCount = 0;
 function renderPdf(){
