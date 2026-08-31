@@ -1625,6 +1625,17 @@ function __injectReader(data){
 }
 function __updateChapter(data){
     novelChapterLoading = false;
+    // 上下模式无缝衔接：静默加载的章节直接追加到正文末尾，不重渲染、不跳转
+    if(novelAppendLoading){
+        novelAppendLoading = false;
+        if(data.kind === 1 && data.content != null){
+            appendNovelChapter(data);
+            if(switchWatchdog){ clearTimeout(switchWatchdog); switchWatchdog = null; }
+            switchingChapter = false;
+            return;
+        }
+        // 追加失败或内容类型不符：退回正常渲染
+    }
     if(data.kind != null) DATA.kind = data.kind;
     if(data.title != null) DATA.title = data.title;
     if(data.content != null) DATA.content = data.content;
@@ -1652,6 +1663,8 @@ function setTitle(t){
 function renderContent(){
     restoreGen++;
     restoringPage = false;
+    novelAppendLoading = false;
+    novelAppendIndex = DATA.current || 0;
     var r = $('reader');
     r.innerHTML = '';
     r.className = '';
@@ -1752,9 +1765,13 @@ function copyAllowed(src, dst, depth){
 }
 
 
-/* ===== 小说：滚动到底自动加载下一章（影视+风格） ===== */
-var novelChapterLoading = false;
+/* ===== 小说：上下模式无缝衔接加载下一章 ===== */
+var novelChapterLoading = false;   // 分页模式跳转中
+var novelAppendLoading = false;    // 上下模式静默追加中
+var novelAppendIndex = 0;          // 已无缝追加到的章节下标
+
 function loadNextNovelChapter(){
+    // 分页模式：跳转式切章（保留原逻辑）
     if(novelChapterLoading) return;
     if(!DATA.chapters || DATA.chapters.length === 0) return;
     if(DATA.current >= DATA.chapters.length - 1){ showToast('已到最终章'); return; }
@@ -1762,6 +1779,47 @@ function loadNextNovelChapter(){
     showToast('正在加载下一章...');
     goChapter(DATA.current + 1);
     setTimeout(function(){ novelChapterLoading = false; }, 2000);
+}
+
+function loadNextNovelAppend(){
+    if(novelAppendLoading) return;
+    if(!DATA.chapters || DATA.chapters.length === 0) return;
+    var next = novelAppendIndex + 1;
+    if(next >= DATA.chapters.length) return; // 已到最终章，静默结束
+    novelAppendLoading = true;
+    AndroidReader.loadChapter(DATA.chapters[next].url);
+}
+
+function appendNovelChapter(data){
+    var r = $('reader');
+    // 章节标题分隔
+    var h = document.createElement('div');
+    h.className = 'novel-chapter-title';
+    h.textContent = data.title || '';
+    r.appendChild(h);
+    // 章节正文
+    var w = document.createElement('div');
+    w.className = 'novel-content';
+    var content = data.content || '';
+    if(looksLikeHtml(content)){
+        var body = document.createElement('div'); body.className = 'novel-html';
+        body.innerHTML = sanitizeHtml(content);
+        w.appendChild(body);
+    } else {
+        content.split(/\n+/).forEach(function(para){
+            para = para.replace(/\r/g,'').trim();
+            if(!para) return;
+            var p = document.createElement('p'); p.textContent = para; w.appendChild(p);
+        });
+    }
+    r.appendChild(w);
+    applyAllSettings();
+    // 更新游标与当前章
+    novelAppendIndex++;
+    if(DATA.current < novelAppendIndex) DATA.current = novelAppendIndex;
+    updateCharCount();
+    var t = DATA.chapters && DATA.chapters[novelAppendIndex] ? DATA.chapters[novelAppendIndex].name : data.title;
+    setTitle(t || DATA.vodName || '阅读');
 }
 /* ===== 漫画：影视+ 独立阅读器 ===== */
 var comicIdx = 0, comicLoading = false;
@@ -1817,11 +1875,9 @@ function renderComic(){
         for(var i = 0; i < comicTotal; i++){
             (function(src){ var im = new Image(); im.src = src; comicImages.push(im); })(DATA.images[i]);
         }
-        bindComicSwipe(wrap);
+        bindComicTouch(stage);
         var left = document.createElement('div'); left.className = 'comic-tap-left'; left.textContent = '‹';
-        left.onclick = function(){ comicFlip(-1); };
         var right = document.createElement('div'); right.className = 'comic-tap-right'; right.textContent = '›';
-        right.onclick = function(){ comicFlip(1); };
         stage.appendChild(left); stage.appendChild(right);
         comicShowPage(0);
     } else {
@@ -1853,21 +1909,48 @@ function comicShowPage(i){
     updateComicInfo();
 }
 
-function bindComicSwipe(el){
-    el.addEventListener('touchstart', function(e){
-        comicTouchX = e.touches[0].clientX;
-        comicTouchY = e.touches[0].clientY;
-        comicSwiping = true;
+function bindComicTouch(stage){
+    var startX = 0, startY = 0, moved = false;
+    var suppressClick = false;
+    // 触摸统一在舞台处理：滑动翻页 / 点按左中右区域
+    stage.addEventListener('touchstart', function(e){
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        moved = false;
     }, {passive:true});
-    el.addEventListener('touchend', function(e){
-        if(!comicSwiping) return;
-        comicSwiping = false;
-        var dx = e.changedTouches[0].clientX - comicTouchX;
-        var dy = e.changedTouches[0].clientY - comicTouchY;
-        if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)){
+    stage.addEventListener('touchmove', function(e){
+        var dx = Math.abs(e.touches[0].clientX - startX);
+        var dy = Math.abs(e.touches[0].clientY - startY);
+        if(dx > 10 || dy > 10) moved = true;
+    }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+        var dx = e.changedTouches[0].clientX - startX;
+        var dy = e.changedTouches[0].clientY - startY;
+        var adx = Math.abs(dx), ady = Math.abs(dy);
+        if(adx > 50 && adx > ady){
+            // 左右滑动翻页
+            suppressClick = true;
+            setTimeout(function(){ suppressClick = false; }, 400);
             comicFlip(dx < 0 ? 1 : -1);
+            return;
         }
+        if(moved) return; // 纵向滚动或小位移，不当作点击
+        // 点按：左1/3上一页，右1/3下一页，中间切换UI
+        var w = window.innerWidth;
+        var x = e.changedTouches[0].clientX;
+        if(x < w * 0.3){ comicFlip(-1); }
+        else if(x > w * 0.7){ comicFlip(1); }
+        else { toggleUIForKind(); }
     }, {passive:true});
+    // 鼠标/特殊环境兜底：点击翻页，滑动后400ms内抑制（避免与触摸重复）
+    stage.addEventListener('click', function(e){
+        if(suppressClick){ e.preventDefault(); e.stopPropagation(); return; }
+        var w = window.innerWidth;
+        var x = e.clientX;
+        if(x < w * 0.3){ comicFlip(-1); }
+        else if(x > w * 0.7){ comicFlip(1); }
+        else { toggleUIForKind(); }
+    }, {passive:false});
 }
 
 function updateComicInfo(){
@@ -2071,6 +2154,11 @@ function goChapter(i){
 function __chapterFailed(){
     restoreGen++;
     restoringPage = false;
+    // 无缝衔接加载失败：解锁，允许下次滚动再试（不打断阅读）
+    if(novelAppendLoading){
+        novelAppendLoading = false;
+        return;
+    }
     if(!switchingChapter){ reportProgress(); return; }
     if(switchWatchdog){ clearTimeout(switchWatchdog); switchWatchdog = null; }
     switchingChapter = false;
@@ -2232,7 +2320,7 @@ window.addEventListener('scroll', function(){
         else if(DATA.kind === 2) loadMoreComic();
     }
 });
-// 小说翻页：仅在滚到底部附近且正在向下滚动时触发
+// 小说：上下模式提前预加载无缝衔接；分页模式滚到底部跳转
 var _lastScrollY = 0;
 var _novelScrollTimer = null;
 window.addEventListener('scroll', function(){
@@ -2240,8 +2328,16 @@ window.addEventListener('scroll', function(){
     var curY = window.scrollY;
     var scrollingDown = curY > _lastScrollY;
     _lastScrollY = curY;
-    // 必须向下滚动 + 距离底部200px以内
-    if(scrollingDown && (window.innerHeight + curY >= document.body.scrollHeight - 200)){
+    if(!scrollingDown) return;
+    // 上下模式：剩约1.5屏高度时提前预加载下一章，滑到底直接无缝续读
+    if(!isPageMode()){
+        if(window.innerHeight + curY >= document.body.scrollHeight - window.innerHeight * 1.5){
+            loadNextNovelAppend();
+        }
+        return;
+    }
+    // 分页模式：距离底部200px以内并停留0.8秒才跳转下一章
+    if(window.innerHeight + curY >= document.body.scrollHeight - 200){
         if(!_novelScrollTimer){
             _novelScrollTimer = setTimeout(function(){
                 loadNextNovelChapter();
