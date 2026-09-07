@@ -204,7 +204,7 @@ jobs:
         run: |
           rm -rf dist
           mkdir -p dist
-          cp Release/apk/*.apk dist/
+          find app/build/outputs/apk -type f -name "*.apk" -exec cp {} dist/ \;
           ls -lh dist/
 
       - name: Prepare release notes input
