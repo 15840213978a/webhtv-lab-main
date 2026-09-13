@@ -95,7 +95,7 @@ jobs:
       - name: 校验固定签名
         shell: pwsh
         run: |
-          $expected = 'e8d8e938719c7348b4b09c1c6a57df9599817fc98fb2e170f721e17a0a16b235'
+          $expected = '4c9247aa4363ba4ef3003b1272a9d32a2b9d28f78d005fa92b3dfe6312e59584'
           $apksigner = Get-ChildItem -LiteralPath $env:ANDROID_HOME -Recurse -Filter 'apksigner.bat' |
             Sort-Object FullName -Descending |
             Select-Object -First 1
